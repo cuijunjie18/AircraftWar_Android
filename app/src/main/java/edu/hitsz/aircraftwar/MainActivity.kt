@@ -21,14 +21,15 @@ class MainActivity : AppCompatActivity() {
   companion object {
     // 保持与原项目一致的逻辑尺寸（用于游戏坐标计算）
     const val TAG = "MainActivity"
-    const val LOGIC_WIDTH = 512
-    const val LOGIC_HEIGHT = 768
   }
 
   private lateinit var gameView: GameView
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
+    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
     setContentView(R.layout.activity_main)
 
     // 初始化图片管理器
@@ -38,13 +39,6 @@ class MainActivity : AppCompatActivity() {
     gameView = GameView(AircraftWarApplication.context)
     val container = findViewById<FrameLayout>(R.id.game_container)
     container.addView(gameView)
-
-    // 全屏显示（隐藏状态栏）
-//    requestWindowFeature(Window.FEATURE_NO_TITLE)
-//    window.setFlags(
-//      WindowManager.LayoutParams.FLAG_FULLSCREEN,
-//      WindowManager.LayoutParams.FLAG_FULLSCREEN
-//    )
   }
 
   override fun onResume() {

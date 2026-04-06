@@ -1,6 +1,7 @@
 package edu.hitsz.aircraftwar.Views
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
@@ -32,14 +33,14 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
   companion object {
     private const val TAG = "GameView"
 
-    // 逻辑尺寸（用于游戏坐标计算，保持与原项目一致）
-    private const val LOGIC_WIDTH: Float = AircraftWarApplication.SCREEN_WIDTH.toFloat()
-    private const val LOGIC_HEIGHT: Float = AircraftWarApplication.SCREEN_HEIGHT.toFloat()
-
     // 目标帧率
     private const val TARGET_FPS = 60
     private const val FRAME_INTERVAL = 1000L / TARGET_FPS  // ~16ms
   }
+
+  // 背景图片
+  private var backgroundBitmapScaled: Bitmap? = null
+  private var backgroundTop: Int = 0
 
   // 子弹发射间隔控制
   private val cycleDuration = 600
@@ -64,9 +65,6 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
     typeface = Typeface.DEFAULT_BOLD
   }
 
-  // 缩放比例：将逻辑坐标映射到实际屏幕
-  private var scaleFactor = 1.0f
-
   // 游戏对象
   private lateinit var heroAircraft: HeroAircraft
   private var enemyAircrafts: MutableList<AbstractAircraft> = mutableListOf()
@@ -80,6 +78,7 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
 
 
   init {
+    Log.d(TAG, "GameView created")
     surfaceHolder.addCallback(this) // 设置SurfaceHolder回调，监听surface创建和销毁
     isFocusable = true
     isFocusableInTouchMode = true
@@ -87,8 +86,8 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
 
   private fun initGameObjects() {
     heroAircraft = HeroAircraft(
-      AircraftWarApplication.SCREEN_WIDTH / 2,
-      AircraftWarApplication.SCREEN_HEIGHT - ImageManager.heroImage.height,
+      width / 2,
+      height - ImageManager.heroImage.height,
       0, 0, 100
     )
   }
@@ -98,17 +97,10 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
   // ======================
 
   override fun surfaceCreated(holder: SurfaceHolder) {
-    // 计算缩放比例：保持 512:768 比例适配不同屏幕
-    val metrics = resources.displayMetrics
-    val screenWidth = metrics.widthPixels.toFloat()
-    val screenHeight = metrics.heightPixels.toFloat()
+    assert(AircraftWarApplication.SCREEN_HEIGHT == height)
+    assert(AircraftWarApplication.SCREEN_WIDTH == width)
 
-    val widthScale = screenWidth / LOGIC_WIDTH
-    val heightScale = screenHeight / LOGIC_HEIGHT
-    scaleFactor = widthScale.coerceAtMost(heightScale)  // 保持比例，避免拉伸
-
-    Log.d(TAG, "Screen: ${screenWidth}x$screenHeight, Scale: $scaleFactor")
-    Log.d(TAG, "Screen: ${width}x${height}, Scale: $scaleFactor")
+    backgroundBitmapScaled = Bitmap.createScaledBitmap(ImageManager.backgroundImage, width, height, false)
 
     // 初始化游戏对象
     initGameObjects()
@@ -152,8 +144,8 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
           val mobWidth = ImageManager.mobEnemyImage.width
           enemyAircrafts.add(
             MobEnemy(
-              (Math.random() * (AircraftWarApplication.SCREEN_WIDTH - mobWidth)).toInt(),
-              (Math.random() * AircraftWarApplication.SCREEN_HEIGHT * 0.05).toInt(),
+              (Math.random() * (width - mobWidth)).toInt(),
+              (Math.random() * height * 0.05).toInt(),
               0,
               10,
               30
@@ -289,9 +281,8 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
   }
 
   private fun drawGame(canvas: Canvas) {
-    var backgroundTop = 0
     // Draw scrolling background
-    ImageManager.backgroundImage?.let { bg ->
+    backgroundBitmapScaled?.let { bg ->
       canvas.drawBitmap(bg, 0f, (backgroundTop - height).toFloat(), paint)
       canvas.drawBitmap(bg, 0f, backgroundTop.toFloat(), paint)
       backgroundTop += 1
@@ -343,8 +334,6 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
    */
   fun release() {
     overGame()
-    // TODO: 释放图片、音效等资源
-    // bitmaps.forEach { if (!it.isRecycled) it.recycle() }
   }
 
 }
