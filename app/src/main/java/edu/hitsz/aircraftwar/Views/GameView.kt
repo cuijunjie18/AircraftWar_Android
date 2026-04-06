@@ -153,7 +153,7 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
           )
         }
         // 所有飞行器发送子弹
-//        shootAction()
+        shootAction()
       }
 
       // 子弹飞动
@@ -225,7 +225,7 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
   private fun crashCheckAction() {
     // TODO: Enemy bullets attack hero
 
-    // Hero bullets attack enemy
+    // 英雄子弹与敌机碰撞检测
     for (bullet in heroBullets) {
       if (bullet.notValid()) continue
       for (enemyAircraft in enemyAircrafts) {
@@ -240,12 +240,15 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
             score += 10
           }
         }
-        // Hero and enemy collision - both destroyed
-        if (enemyAircraft.crash(heroAircraft) || heroAircraft.crash(enemyAircraft)) {
-          Log.d(TAG, "Hero and enemy collision")
-          enemyAircraft.vanish()
-          heroAircraft.decreaseHp(heroAircraft.hp)
-        }
+      }
+    }
+
+    // 英雄飞机与敌机碰撞检测（独立于子弹循环）
+    for (enemyAircraft in enemyAircrafts) {
+      if (enemyAircraft.notValid()) continue
+      if (enemyAircraft.crash(heroAircraft) || heroAircraft.crash(enemyAircraft)) {
+        enemyAircraft.vanish()
+        heroAircraft.decreaseHp(heroAircraft.hp)
       }
     }
 
