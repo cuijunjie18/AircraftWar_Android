@@ -39,6 +39,11 @@ class MainActivity : AppCompatActivity() {
     gameView = GameView(AircraftWarApplication.context)
     val container = findViewById<FrameLayout>(R.id.game_container)
     container.addView(gameView)
+
+    // 定义游戏结束回调
+    gameView.onGameOver = { score ->
+      Log.d(TAG, "Game over, score: $score")
+    }
   }
 
   override fun onResume() {

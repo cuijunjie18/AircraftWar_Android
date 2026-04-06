@@ -4,6 +4,7 @@ import edu.hitsz.aircraftwar.logic.aircraft.AbstractAircraft
 import android.graphics.Bitmap
 import edu.hitsz.aircraftwar.AircraftWarApplication
 import edu.hitsz.aircraftwar.logic.utils.ImageManager
+import kotlin.collections.get
 
 
 abstract class AbstractFlyingObject {
@@ -29,12 +30,6 @@ abstract class AbstractFlyingObject {
    * y 轴移动速度
    */
   protected var speedY: Int = 0
-
-  /**
-   * 图片,
-   * null 表示未设置
-   */
-  protected var image: Bitmap? = null
 
   /**
    * x 轴长度，根据图片尺寸获得
@@ -105,12 +100,37 @@ abstract class AbstractFlyingObject {
     val fWidth = flyingObject.width
     val fHeight = flyingObject.height
 
+    if (fWidth == -1 || fHeight == -1) {
+      this.width = getWidthVal()
+      this.height = getHeightVal()
+    }
+
     return x + (fWidth + this.width) / 2 > locationX && x - (fWidth + this.width) / 2 < locationX && y + (fHeight / fFactor + this.height / factor) / 2 > locationY && y - (fHeight / fFactor + this.height / factor) / 2 < locationY
   }
 
   fun setLocation(locationX: Double, locationY: Double) {
     this.locationX = locationX.toInt()
     this.locationY = locationY.toInt()
+  }
+
+  fun getWidthVal(): Int {
+    if (width == -1) {
+      val image = ImageManager.get(this)
+      if (image != null) {
+        width = image.width
+      }
+    }
+    return width
+  }
+
+  fun getHeightVal(): Int {
+    if (height == -1) {
+      val image = ImageManager.get(this)
+      if (image != null) {
+        height = image.height
+      }
+    }
+    return height
   }
 
   fun notValid(): Boolean {

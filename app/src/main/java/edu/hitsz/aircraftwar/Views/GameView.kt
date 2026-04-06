@@ -148,12 +148,12 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
               (Math.random() * height * 0.05).toInt(),
               0,
               10,
-              30
+              10
             )
           )
         }
         // 所有飞行器发送子弹
-        shootAction()
+//        shootAction()
       }
 
       // 子弹飞动
@@ -231,6 +231,7 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
       for (enemyAircraft in enemyAircrafts) {
         if (enemyAircraft.notValid()) continue
         if (enemyAircraft.crash(bullet)) {
+          Log.d(TAG, "Enemy hit by hero bullet")
           // Enemy hit by hero bullet
           enemyAircraft.decreaseHp(bullet.power)
           bullet.vanish()
@@ -241,8 +242,9 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
         }
         // Hero and enemy collision - both destroyed
         if (enemyAircraft.crash(heroAircraft) || heroAircraft.crash(enemyAircraft)) {
+          Log.d(TAG, "Hero and enemy collision")
           enemyAircraft.vanish()
-          heroAircraft.decreaseHp(Int.MAX_VALUE)
+          heroAircraft.decreaseHp(heroAircraft.hp)
         }
       }
     }
@@ -327,6 +329,26 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
     canvas.drawText("SCORE: $score", x, y, textPaint)
     y += 50f
     canvas.drawText("LIFE: ${heroAircraft.hp}", x, y, textPaint)
+  }
+
+  // =====================
+  //   Touch control
+  // =====================
+
+  override fun onTouchEvent(event: MotionEvent): Boolean {
+    when (event.action) {
+      MotionEvent.ACTION_MOVE, MotionEvent.ACTION_DOWN -> {
+        val x = event.x
+        val y = event.y
+        if (x < 0 || x > width || y < 0 || y > height) {
+          return true
+        }
+        if (::heroAircraft.isInitialized) {
+          heroAircraft.setLocation(x.toDouble(), y.toDouble())
+        }
+      }
+    }
+    return true
   }
 
   /**
