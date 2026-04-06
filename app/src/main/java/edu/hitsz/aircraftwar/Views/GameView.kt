@@ -133,6 +133,9 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
     gameThread = Thread(this, "GameLoop").apply { start() }
     Log.d(TAG, "Game started")
   }
+  fun pauseGame() {
+    isRunning = false
+  }
   fun overGame() {
     isRunning = false
     gameThread?.join()

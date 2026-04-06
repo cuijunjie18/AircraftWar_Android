@@ -10,6 +10,7 @@ import android.view.Window
 import android.view.WindowManager
 import android.widget.FrameLayout
 import edu.hitsz.aircraftwar.Views.GameView
+import edu.hitsz.aircraftwar.logic.utils.ImageManager
 
 /**
  * Android 程序入口 - 替代 Swing 的 Main 类
@@ -29,6 +30,9 @@ class MainActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
+
+    // 初始化图片管理器
+    ImageManager.init(AircraftWarApplication.context)
 
     // 初始化自定义游戏 View
     gameView = GameView(AircraftWarApplication.context)
