@@ -19,6 +19,7 @@ import edu.hitsz.aircraftwar.logic.basic.AbstractFlyingObject
 import edu.hitsz.aircraftwar.logic.bullet.BaseBullet
 import edu.hitsz.aircraftwar.logic.bullet.EnemyBullet
 import edu.hitsz.aircraftwar.logic.utils.ImageManager
+import edu.hitsz.aircraftwar.setting.Setting
 import kotlin.compareTo
 import kotlin.div
 import kotlin.text.toInt
@@ -122,8 +123,10 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
   // =======================
 
   fun startGame() {
-    gameThread = Thread(this, "GameLoop").apply { start() }
     Log.d(TAG, "Game started")
+    Log.d(TAG, "当前难度：${Setting.getDifficulty()}")
+    Log.d(TAG, "音效开关：${Setting.musicOpen}")
+    gameThread = Thread(this, "GameLoop").apply { start() }
   }
   fun pauseGame() {
     isRunning = false
