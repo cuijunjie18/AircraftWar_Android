@@ -4,8 +4,9 @@ import edu.hitsz.aircraftwar.AircraftWarApplication
 import edu.hitsz.aircraftwar.logic.bullet.BaseBullet
 import java.util.LinkedList
 
-class EliteEnemy: AbstractAircraft {
-  private var shootMode: String = "NORMAL"
+
+class SuperEliteEnemy: AbstractAircraft {
+  private var shootMode: String = "SCATTER"
 
   /**
    * 子弹伤害
@@ -17,11 +18,10 @@ class EliteEnemy: AbstractAircraft {
    */
   private val direction = 1
 
-  private val shootInterval = 2 // 射击间隔
+  private val shootInterval = 3 // 射击间隔
   private var shootCount = 0 // 射击计数
 
   constructor(locationX: Int, locationY: Int, speedX: Int, speedY: Int, hp: Int) : super(locationX, locationY, speedX, speedY, hp) {
-    shootMode = "NORMAL"
     setShootStrategy(shootMode)
   }
 
@@ -33,21 +33,21 @@ class EliteEnemy: AbstractAircraft {
     }
   }
 
-  public override fun shoot(): MutableList<BaseBullet?>? {
+  public override fun shoot(): MutableList<BaseBullet?>? { // 实现散射模式
     shootCount++
-    if (shootCount % shootInterval != 0) {
+    if (shootCount % shootInterval !== 0) { // 控制射击频率
       return LinkedList<BaseBullet?>()
     }
     shootCount = 0
     val x = this.locationX
     val y = this.locationY + direction * 2
-    val speedX = 0
+    val speedX = this.speedX
     val speedY = this.speedY + direction * 2
     return shootStrategy!!.shoot(x, y, speedX, speedY, power, 1)
   }
 
   public override fun update() {
-    decreaseHp(maxHp)
+    decreaseHp(40)
   }
 
 }

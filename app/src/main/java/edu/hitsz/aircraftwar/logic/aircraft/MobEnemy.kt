@@ -22,4 +22,8 @@ class MobEnemy: AbstractAircraft {
   public override fun shoot(): MutableList<BaseBullet?>? {
     return LinkedList<BaseBullet?>()
   }
+
+  public override fun update() {
+    decreaseHp(maxHp)
+  }
 }

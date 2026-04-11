@@ -1,10 +1,8 @@
 package edu.hitsz.aircraftwar.logic.basic
 
-import edu.hitsz.aircraftwar.logic.aircraft.AbstractAircraft
-import android.graphics.Bitmap
 import edu.hitsz.aircraftwar.AircraftWarApplication
+import edu.hitsz.aircraftwar.logic.aircraft.AbstractAircraft
 import edu.hitsz.aircraftwar.logic.utils.ImageManager
-import kotlin.collections.get
 
 
 abstract class AbstractFlyingObject {
@@ -144,5 +142,9 @@ abstract class AbstractFlyingObject {
    */
   fun vanish() {
     isValid = false
+  }
+
+  // 用于观察者模式
+  open fun update() {
   }
 }

@@ -2,7 +2,6 @@ package edu.hitsz.aircraftwar.Views
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -17,12 +16,10 @@ import edu.hitsz.aircraftwar.logic.aircraft.HeroAircraft
 import edu.hitsz.aircraftwar.logic.aircraft.MobEnemy
 import edu.hitsz.aircraftwar.logic.basic.AbstractFlyingObject
 import edu.hitsz.aircraftwar.logic.bullet.BaseBullet
-import edu.hitsz.aircraftwar.logic.bullet.EnemyBullet
+import edu.hitsz.aircraftwar.logic.factory.*
 import edu.hitsz.aircraftwar.logic.utils.ImageManager
 import edu.hitsz.aircraftwar.setting.Setting
-import kotlin.compareTo
-import kotlin.div
-import kotlin.text.toInt
+import java.util.Random
 
 
 /**
@@ -38,6 +35,34 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
     private const val TARGET_FPS = 60
     private const val FRAME_INTERVAL = 1000L / TARGET_FPS  // ~16ms
   }
+
+  // 飞行物列表
+  private lateinit var heroAircraft: HeroAircraft
+  private var enemyAircrafts: MutableList<AbstractAircraft> = mutableListOf()
+  private var heroBullets: MutableList<BaseBullet> = mutableListOf()
+  private var enemyBullets: MutableList<BaseBullet> = mutableListOf()
+
+  // 工厂
+  private val mobEnemyFactory = MobEnemyFactory()
+  private val eliteEnemyFactory = EliteEnemyFactory()
+  private val superEliteEnemyFactory = SuperEliteEnemyFactory()
+  private val bossEnemyFactory = BossEnemyFactory()
+
+  /**
+   * 屏幕中出现的敌机最大数量
+   */
+  private var enemyMaxNumber = 5
+  private var bossExistFlag = 0 // 是否已经生成Boss
+  private var bossKillCount = 0 // 已击毁Boss数量
+  private var randomFactory: Random = Random() // 生成随机数
+
+  /**
+   * 敌机生成概率
+   * 70% 生成普通敌机
+   * 20% 生成精英敌机
+   * 10% 生成超级精英敌机
+   */
+  private val enemyRate = 10
 
   // 背景图片
   private var backgroundBitmapScaled: Bitmap? = null
@@ -55,9 +80,6 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
   // 分数
   private var score = 0
 
-  // 敌人数量
-  private var enemyMaxNumber = 5
-
   //  画笔，用于绘制图像、文字
   private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
   private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -65,12 +87,6 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
     textSize = 48f
     typeface = Typeface.DEFAULT_BOLD
   }
-
-  // 游戏对象
-  private lateinit var heroAircraft: HeroAircraft
-  private var enemyAircrafts: MutableList<AbstractAircraft> = mutableListOf()
-  private var heroBullets: MutableList<BaseBullet> = mutableListOf()
-  private var enemyBullets: MutableList<BaseBullet> = mutableListOf()
 
   // SurfaceHolder，控制surface的创建和销毁
   private val surfaceHolder: SurfaceHolder = holder
@@ -155,16 +171,24 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
       if (timeCountAndNewCycleJudge()) {
         // Spawn new enemy aircraft
         if (enemyAircrafts.size < enemyMaxNumber) {
-          val mobWidth = ImageManager.mobEnemyImage.width
-          enemyAircrafts.add(
-            MobEnemy(
-              (Math.random() * (width - mobWidth)).toInt(),
-              (Math.random() * height * 0.05).toInt(),
-              0,
-              10,
-              10
-            )
-          )
+          val randomNum = randomFactory.nextInt(enemyRate).toInt()
+
+          // 根据随机数生成普通、精英敌机、超级精英敌机
+          if (randomNum == 0){
+            enemyAircrafts.add(superEliteEnemyFactory.createEnemy()!!);
+          }else if (randomNum == 1 || randomNum == 2){
+            enemyAircrafts.add(eliteEnemyFactory.createEnemy()!!);
+          }
+          else{
+            enemyAircrafts.add(mobEnemyFactory.createEnemy()!!);
+          }
+        }
+
+        // 每300分产生一个Boss, 且场上只能有一个Boss(仅普通模式、困难模式)
+        if (score >= (bossKillCount + 1) * 300 && score != 0 && bossExistFlag == 0
+          && Setting.getDifficulty() != "easy"){
+          enemyAircrafts.add(bossEnemyFactory.createEnemy()!!);
+          bossExistFlag = 1;
         }
         // 所有飞行器发送子弹
         shootAction()
@@ -215,10 +239,23 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
   }
 
   private fun shootAction() {
-    // TODO: Enemy shooting
 
-    // Hero shooting
+    // 敌机射击
+    for (enemy in enemyAircrafts) {
+      if (enemy is MobEnemy) continue  // 普通敌机不射击
+
+      val bullets = enemy.shoot()
+      enemyBullets.addAll(bullets!!.filterNotNull())
+//      for (bullet in bullets!!) {
+//        bombsubject.registerObserver(bullet)
+//      }
+    }
+
+    // 英雄射击
     heroBullets.addAll(heroAircraft.shoot().filterNotNull())
+
+    // 检查火力道具时间
+    heroAircraft.checkShootModeDuration()
   }
 
   private fun bulletsMoveAction() {

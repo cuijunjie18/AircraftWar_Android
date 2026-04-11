@@ -9,7 +9,7 @@ import edu.hitsz.aircraftwar.logic.strategy.WaveShoot
 
 
 abstract class AbstractAircraft : AbstractFlyingObject {
-  private var maxHp: Int = 0
+  var maxHp: Int = 0
   var hp: Int = 0
 
   // 射击策略接口

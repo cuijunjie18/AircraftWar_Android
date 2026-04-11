@@ -4,8 +4,8 @@ import edu.hitsz.aircraftwar.logic.bullet.BaseBullet
 
 
 
-abstract class ShootStrategy {
-  abstract fun shoot(
+interface ShootStrategy {
+  fun shoot(
     x: Int,
     y: Int,
     speedX: Int,
