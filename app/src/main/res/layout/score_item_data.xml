@@ -1,60 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingLeft="10dp"
-    android:paddingTop="15dp"
-    android:paddingRight="10dp"
-    android:paddingBottom="15dp"
+    android:orientation="horizontal"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="14dp"
+    android:paddingBottom="14dp"
+    android:background="?android:attr/selectableItemBackground"
     android:id="@+id/scoreInfo">
 
-    <!-- 用户区域：可扩展为头像+用户名，这里简化为单个TextView -->
+    <!-- 排名 -->
+    <TextView
+        android:id="@+id/rankNumber"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="1"
+        android:textSize="16sp"
+        android:textColor="#1976D2"
+        android:textStyle="bold"
+        android:gravity="center" />
+
+    <!-- 用户名 -->
     <TextView
         android:id="@+id/userName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="2"
         android:ellipsize="end"
         android:maxLines="1"
         android:text="用户名"
-        android:textColor="@android:color/black"
-        android:textSize="16sp"
+        android:textColor="#212121"
+        android:textSize="15sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/scoreValue"
-        app:layout_constraintHorizontal_chainStyle="spread"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_default="wrap" />
+        android:gravity="center" />
 
-    <!-- 分数：居中突出显示 -->
+    <!-- 分数 -->
     <TextView
         android:id="@+id/scoreValue"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="98"
+        android:layout_weight="2"
+        android:text="0"
         android:textColor="#FF5722"
-        android:textSize="20sp"
+        android:textSize="18sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/timeInfo"
-        app:layout_constraintStart_toEndOf="@+id/userName"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:gravity="center" />
 
-    <!-- 时间：靠右显示 -->
+    <!-- 时间 -->
     <TextView
         android:id="@+id/timeInfo"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="3"
         android:ellipsize="end"
         android:maxLines="1"
-        android:text="刚刚"
-        android:textColor="@android:color/darker_gray"
-        android:textSize="14sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/scoreValue"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:text="时间"
+        android:textColor="#9E9E9E"
+        android:textSize="13sp"
+        android:gravity="center" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>
