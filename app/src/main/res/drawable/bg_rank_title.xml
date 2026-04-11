@@ -1,0 +1,17 @@
+<!-- bg_rank_title.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:startColor="#FF6A00"
+        android:endColor="#EE0979"
+        android:angle="45"
+        android:type="linear" />
+    <corners android:radius="30dp" />
+    <stroke
+        android:width="1dp"
+        android:color="#40FFFFFF" />
+    <padding
+        android:left="24dp"
+        android:top="12dp"
+        android:right="24dp"
+        android:bottom="12dp" />
+</shape>

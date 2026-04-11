@@ -32,6 +32,7 @@ class MainActivity : AppCompatActivity() {
   }
 
   private lateinit var gameView: GameView
+  private var isGameOver = false
 
   @RequiresApi(Build.VERSION_CODES.O)
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,11 +58,14 @@ class MainActivity : AppCompatActivity() {
 
   @RequiresApi(Build.VERSION_CODES.O)
   fun gameOver(score: Int) {
+    isGameOver = true
     var dataInfo: SingleGameInfo = SingleGameInfo()
     dataInfo.score = score
     dataInfo.userName = Setting.userName
     dataInfo.date = Utils.getCurrentFormatTime()
     DataManager.saveData(dataInfo)
+    // 先停止游戏线程，避免 onPause 中 join 导致阻塞
+    gameView.overGame()
     val intent = Intent(this, RankActivity::class.java)
     startActivity(intent)
   }
@@ -69,13 +73,17 @@ class MainActivity : AppCompatActivity() {
   override fun onResume() {
     super.onResume()
     // 恢复游戏循环（对应原 game.action()）
-    gameView.startGame()
+    if (!isGameOver) {
+      gameView.startGame()
+    }
   }
 
   override fun onPause() {
     super.onPause()
     // 暂停游戏，避免后台耗电
-    gameView.overGame()
+    if (!isGameOver) {
+      gameView.overGame()
+    }
   }
 
   override fun onDestroy() {

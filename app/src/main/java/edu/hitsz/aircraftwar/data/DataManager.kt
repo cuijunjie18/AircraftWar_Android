@@ -73,6 +73,7 @@ object DataManager {
         }
       }
     }
+    list.sortByDescending { it.score } // 按分数降序排序
     return list
   }
 }

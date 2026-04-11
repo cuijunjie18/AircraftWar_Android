@@ -27,6 +27,6 @@ class RankActivity : AppCompatActivity() {
     scoresRecyclerView?.adapter = adapter
 
     val rankName:TextView = findViewById<TextView>(R.id.textForRank)
-    rankName.text = "排行榜: $difficulty"
+    rankName.text = "排行榜"
   }
 }

@@ -18,13 +18,16 @@ class ScoreAdapter(val scoresList: List<SingleGameInfo>) :
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
     val view = LayoutInflater.from(parent.context)
-      .inflate(R.layout.activity_rank, parent, false)
+      .inflate(R.layout.score_item_data, parent, false)
     val holder = ViewHolder(view)
     return holder
   }
 
   override fun onBindViewHolder(holder: ViewHolder, position: Int) {
     val scoreInfo = scoresList[position]
+    holder.rankTextView.text = scoreInfo.userName
+    holder.nameTextView.text = scoreInfo.score.toString()
+    holder.scoreTextView.text = scoreInfo.date
   }
 
   override fun getItemCount() = scoresList.size
