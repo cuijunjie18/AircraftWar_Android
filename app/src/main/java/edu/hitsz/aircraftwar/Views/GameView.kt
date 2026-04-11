@@ -11,6 +11,7 @@ import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import edu.hitsz.aircraftwar.AircraftWarApplication
+import edu.hitsz.aircraftwar.R
 import edu.hitsz.aircraftwar.logic.aircraft.AbstractAircraft
 import edu.hitsz.aircraftwar.logic.aircraft.BossEnemy
 import edu.hitsz.aircraftwar.logic.aircraft.EliteEnemy
@@ -34,6 +35,7 @@ import edu.hitsz.aircraftwar.logic.prop.PropBomb
 import edu.hitsz.aircraftwar.logic.prop.PropBullet
 import edu.hitsz.aircraftwar.logic.prop.PropBulletPlus
 import edu.hitsz.aircraftwar.logic.utils.ImageManager
+import edu.hitsz.aircraftwar.setting.Music.MusicManager
 import edu.hitsz.aircraftwar.setting.Setting
 import java.util.Random
 import java.util.function.Predicate
@@ -188,6 +190,7 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
     Log.d(TAG, "Game started")
     Log.d(TAG, "当前难度：${Setting.getDifficulty()}")
     Log.d(TAG, "音效开关：${Setting.musicOpen}")
+    MusicManager.switchNormalBgm()
     gameThread = Thread(this, "GameLoop").apply { start() }
   }
   fun pauseGame() {
@@ -222,6 +225,7 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
         // 每300分产生一个Boss, 且场上只能有一个Boss(仅普通模式、困难模式)
         if (score >= (bossKillCount + 1) * 300 && score != 0 && bossExistFlag == 0
           && Setting.getDifficulty() != "easy"){
+          MusicManager.switchBossBgm()
           enemyAircrafts.add(bossEnemyFactory.createEnemy()!!);
           bossExistFlag = 1;
         }
@@ -253,6 +257,10 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
 
       // Check if hero is alive
       if (heroAircraft.hp <= 0) {
+        if (Setting.musicOpen) {
+          MusicManager.stopBgm()
+          MusicManager.playSound(MusicManager.SoundType.GAME_OVER)
+        }
         gameOverFlag = true
         post { onGameOver?.invoke(score) }
       }
@@ -288,12 +296,13 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
 
       val bullets = enemy.shoot()
       enemyBullets.addAll(bullets!!.filterNotNull())
-//      for (bullet in bullets!!) {
-//        bombsubject.registerObserver(bullet)
-//      }
+      for (bullet in bullets!!) {
+        bombSubject.registerObserver(bullet)
+      }
     }
 
     // 英雄射击
+//    MusicManager.playSound(MusicManager.SoundType.BULLET_SHOOT) // 太吵了，去掉
     heroBullets.addAll(heroAircraft.shoot().filterNotNull())
 
     // 检查火力道具时间
@@ -356,6 +365,7 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
       for (enemyAircraft in enemyAircrafts) {
         if (enemyAircraft.notValid()) continue
         if (enemyAircraft.crash(bullet)) {
+          MusicManager.playSound(MusicManager.SoundType.BULLET_HIT)
           // Enemy hit by hero bullet
           enemyAircraft.decreaseHp(bullet.power)
           bullet.vanish()
@@ -399,8 +409,8 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
     for (prop in props) {
       if (prop.notValid()) continue
       if (heroAircraft.crash(prop)) {
+        MusicManager.playSound(MusicManager.SoundType.GET_PROP)
         prop.vanish()
-//        if (MusicOpen) MusicThread(get_prop_music).start()
         when (prop) {
           is PropBlood -> {
             heroAircraft.increaseHp(30)
@@ -415,7 +425,9 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
           }
 
           is PropBomb -> {
-      //          if (MusicOpen) MusicThread(boom_music).start()
+            if (Setting.musicOpen) {
+              MusicManager.playSound(MusicManager.SoundType.BOMB_EXPLOSION)
+            }
             prop.action()
             bombSubject.notifyObservers()
           }
@@ -436,7 +448,10 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
         is MobEnemy -> score += 10
         is EliteEnemy -> score += 20
         is SuperEliteEnemy -> score += 30
-        is BossEnemy -> score += 50
+        is BossEnemy -> {
+          score += 50
+          MusicManager.switchNormalBgm()
+        }
       }
 
 

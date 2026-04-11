@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import edu.hitsz.aircraftwar.MainActivity
 import edu.hitsz.aircraftwar.R
 import edu.hitsz.aircraftwar.logic.difficulty.*
+import edu.hitsz.aircraftwar.setting.Music.MusicManager
 import edu.hitsz.aircraftwar.setting.Setting
 
 class MenuActivity: AppCompatActivity() {
