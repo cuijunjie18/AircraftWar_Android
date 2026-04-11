@@ -14,16 +14,13 @@ object ImageManager {
   /** Class name to image mapping */
   private val classNameImageMap = HashMap<String, Bitmap>()
 
-  lateinit var backgroundImage: Bitmap
-    private set
+  lateinit var backgroundImageEasy: Bitmap
+  lateinit var backgroundImageNormal: Bitmap
+  lateinit var backgroundImageHard: Bitmap
   lateinit var heroImage: Bitmap
-    private set
   lateinit var heroBulletImage: Bitmap
-    private set
   lateinit var enemyBulletImage: Bitmap
-    private set
   lateinit var mobEnemyImage: Bitmap
-    private set
 
   /**
    * Initialize all images from resources.
@@ -32,7 +29,9 @@ object ImageManager {
   fun init(context: Context) {
     val resources = context.resources
 
-    backgroundImage = BitmapFactory.decodeResource(resources, R.drawable.bg)
+    backgroundImageEasy = BitmapFactory.decodeResource(resources, R.drawable.bg)
+    backgroundImageNormal = BitmapFactory.decodeResource(resources, R.drawable.bg3)
+    backgroundImageHard = BitmapFactory.decodeResource(resources, R.drawable.bg5)
     heroImage = BitmapFactory.decodeResource(resources, R.drawable.hero)
     mobEnemyImage = BitmapFactory.decodeResource(resources, R.drawable.mob)
     heroBulletImage = BitmapFactory.decodeResource(resources, R.drawable.bullet_hero)

@@ -44,7 +44,7 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
   private var backgroundTop: Int = 0
 
   // 子弹发射间隔控制
-  private val cycleDuration = 600
+  private val cycleDuration = 1200
   private var cycleTime = 0
   private var timeInterval = 40
 
@@ -56,7 +56,7 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
   private var score = 0
 
   // 敌人数量
-  private var enemyMaxNumber = 10
+  private var enemyMaxNumber = 5
 
   //  画笔，用于绘制图像、文字
   private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -91,6 +91,7 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
       height - ImageManager.heroImage.height,
       0, 0, 100
     )
+    heroAircraft.setShootStrategy("NORMAL")
   }
 
   // ======================
@@ -101,7 +102,17 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
     assert(AircraftWarApplication.SCREEN_HEIGHT == height)
     assert(AircraftWarApplication.SCREEN_WIDTH == width)
 
-    backgroundBitmapScaled = Bitmap.createScaledBitmap(ImageManager.backgroundImage, width, height, false)
+    when (Setting.getDifficulty()) {
+      "easy" -> {
+        backgroundBitmapScaled = Bitmap.createScaledBitmap(ImageManager.backgroundImageEasy, width, height, false)
+      }
+      "medium" -> {
+        backgroundBitmapScaled = Bitmap.createScaledBitmap(ImageManager.backgroundImageNormal, width, height, false)
+      }
+      "hard" -> {
+        backgroundBitmapScaled = Bitmap.createScaledBitmap(ImageManager.backgroundImageHard, width, height, false)
+      }
+    }
 
     // 初始化游戏对象
     initGameObjects()

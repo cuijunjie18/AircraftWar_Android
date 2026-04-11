@@ -1,14 +1,15 @@
 package edu.hitsz.aircraftwar.logic.aircraft
 
 import edu.hitsz.aircraftwar.logic.bullet.BaseBullet
-import edu.hitsz.aircraftwar.logic.bullet.HeroBullet
-import java.util.LinkedList
 
 
 class HeroAircraft: AbstractAircraft {
 
 
   /**攻击方式  */
+  /**攻击方式  */
+  private var shootMode: String = "NORMAL" // 默认
+  private var shootTimes: Int = 0
   /**
    * 子弹一次发射数量
    */
@@ -38,23 +39,33 @@ class HeroAircraft: AbstractAircraft {
     // 英雄机由触屏控制，不通过forward函数移动
   }
 
+  // 改变射击模式
+  fun changeShootMode(mode: String) {
+    shootMode = mode
+    shootTimes = 0 // 重置射击次数
+    setShootStrategy(mode)
+  }
+
+  // 检查射击模式持续时间
+  fun checkShootModeDuration() {
+    if (shootMode != "NORMAL") {
+      shootTimes++
+      if (shootTimes >= 10) { // 持续200次射击后恢复普通模式
+        changeShootMode("NORMAL")
+        shootTimes = 0
+      }
+    }
+  }
+
   /**
    * 通过射击产生子弹
    * @return 射击出的子弹List
    */
   public override fun shoot(): MutableList<BaseBullet?> {
-    val res: MutableList<BaseBullet?> = LinkedList<BaseBullet?>()
     val x = this.locationX
     val y = this.locationY + direction * 2
     val speedX = 0
     val speedY = this.speedY + direction * 5
-    var bullet: BaseBullet?
-    for (i in 0..<shootNum) {
-      // 子弹发射位置相对飞机位置向前偏移
-      // 多个子弹横向分散
-      bullet = HeroBullet(x + (i * 2 - shootNum + 1) * 10, y, speedX, speedY, power)
-      res.add(bullet)
-    }
-    return res
+    return shootStrategy!!.shoot(x, y, speedX, speedY, power, 0)!!
   }
 }
