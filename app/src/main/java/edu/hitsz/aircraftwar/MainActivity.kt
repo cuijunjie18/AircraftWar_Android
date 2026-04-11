@@ -1,5 +1,7 @@
 package edu.hitsz.aircraftwar
 
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.enableEdgeToEdge
@@ -9,8 +11,14 @@ import androidx.core.view.WindowInsetsCompat
 import android.view.Window
 import android.view.WindowManager
 import android.widget.FrameLayout
+import androidx.annotation.RequiresApi
 import edu.hitsz.aircraftwar.Views.GameView
+import edu.hitsz.aircraftwar.Views.RankActivity
+import edu.hitsz.aircraftwar.data.DataManager
+import edu.hitsz.aircraftwar.data.SingleGameInfo
 import edu.hitsz.aircraftwar.logic.utils.ImageManager
+import edu.hitsz.aircraftwar.logic.utils.Utils
+import edu.hitsz.aircraftwar.setting.Setting
 
 /**
  * Android 程序入口 - 替代 Swing 的 Main 类
@@ -25,6 +33,7 @@ class MainActivity : AppCompatActivity() {
 
   private lateinit var gameView: GameView
 
+  @RequiresApi(Build.VERSION_CODES.O)
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
@@ -41,8 +50,20 @@ class MainActivity : AppCompatActivity() {
 
     // 定义游戏结束回调
     gameView.onGameOver = { score ->
-      Log.d(TAG, "Game over, score: $score")
+      Log.d(TAG, "game over: $score")
+      gameOver(score)
     }
+  }
+
+  @RequiresApi(Build.VERSION_CODES.O)
+  fun gameOver(score: Int) {
+    var dataInfo: SingleGameInfo = SingleGameInfo()
+    dataInfo.score = score
+    dataInfo.userName = Setting.userName
+    dataInfo.date = Utils.getCurrentFormatTime()
+    DataManager.saveData(dataInfo)
+    val intent = Intent(this, RankActivity::class.java)
+    startActivity(intent)
   }
 
   override fun onResume() {

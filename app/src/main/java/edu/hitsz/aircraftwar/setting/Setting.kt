@@ -6,6 +6,7 @@ import edu.hitsz.aircraftwar.logic.difficulty.*
 object Setting {
   public var difficulty: Difficulty = Easy()
   public var musicOpen: Boolean = false
+  public var userName: String = "Default"
 
   fun init() {
     Log.d("Setting", "init")

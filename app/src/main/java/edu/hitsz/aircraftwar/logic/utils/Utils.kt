@@ -1,8 +1,13 @@
 package edu.hitsz.aircraftwar.logic.utils
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import edu.hitsz.aircraftwar.logic.bullet.BaseBullet
 import edu.hitsz.aircraftwar.logic.bullet.EnemyBullet
 import edu.hitsz.aircraftwar.logic.bullet.HeroBullet
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 
 object Utils {
@@ -20,5 +25,13 @@ object Utils {
       1 -> bullet = EnemyBullet(x, y, speedX, speedY, power) // 发射一颗子弹
     }
     return bullet
+  }
+
+  @RequiresApi(Build.VERSION_CODES.O)
+  fun getCurrentFormatTime(): String {
+    val beijingTime = ZonedDateTime.now(ZoneId.of("Asia/Shanghai"))
+    val customFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+    val formatted = beijingTime.format(customFormatter)
+    return formatted
   }
 }
