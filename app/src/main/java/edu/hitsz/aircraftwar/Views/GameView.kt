@@ -12,14 +12,31 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import edu.hitsz.aircraftwar.AircraftWarApplication
 import edu.hitsz.aircraftwar.logic.aircraft.AbstractAircraft
+import edu.hitsz.aircraftwar.logic.aircraft.BossEnemy
+import edu.hitsz.aircraftwar.logic.aircraft.EliteEnemy
 import edu.hitsz.aircraftwar.logic.aircraft.HeroAircraft
 import edu.hitsz.aircraftwar.logic.aircraft.MobEnemy
+import edu.hitsz.aircraftwar.logic.aircraft.SuperEliteEnemy
 import edu.hitsz.aircraftwar.logic.basic.AbstractFlyingObject
 import edu.hitsz.aircraftwar.logic.bullet.BaseBullet
-import edu.hitsz.aircraftwar.logic.factory.*
+import edu.hitsz.aircraftwar.logic.factory.BossEnemyFactory
+import edu.hitsz.aircraftwar.logic.factory.EliteEnemyFactory
+import edu.hitsz.aircraftwar.logic.factory.MobEnemyFactory
+import edu.hitsz.aircraftwar.logic.factory.PropBloodFactory
+import edu.hitsz.aircraftwar.logic.factory.PropBombFactory
+import edu.hitsz.aircraftwar.logic.factory.PropBulletFactory
+import edu.hitsz.aircraftwar.logic.factory.PropBulletPlusFactory
+import edu.hitsz.aircraftwar.logic.factory.SuperEliteEnemyFactory
+import edu.hitsz.aircraftwar.logic.observer.BombSubject
+import edu.hitsz.aircraftwar.logic.prop.BaseProp
+import edu.hitsz.aircraftwar.logic.prop.PropBlood
+import edu.hitsz.aircraftwar.logic.prop.PropBomb
+import edu.hitsz.aircraftwar.logic.prop.PropBullet
+import edu.hitsz.aircraftwar.logic.prop.PropBulletPlus
 import edu.hitsz.aircraftwar.logic.utils.ImageManager
 import edu.hitsz.aircraftwar.setting.Setting
 import java.util.Random
+import java.util.function.Predicate
 
 
 /**
@@ -41,12 +58,18 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
   private var enemyAircrafts: MutableList<AbstractAircraft> = mutableListOf()
   private var heroBullets: MutableList<BaseBullet> = mutableListOf()
   private var enemyBullets: MutableList<BaseBullet> = mutableListOf()
+  private var props: MutableList<BaseProp> = mutableListOf()
 
   // 工厂
   private val mobEnemyFactory = MobEnemyFactory()
   private val eliteEnemyFactory = EliteEnemyFactory()
   private val superEliteEnemyFactory = SuperEliteEnemyFactory()
   private val bossEnemyFactory = BossEnemyFactory()
+  private val propBloodFactory = PropBloodFactory()
+  private val propBombFactory = PropBombFactory()
+  private val propBulletFactory = PropBulletFactory()
+  private val propBulletPlusFactory = PropBulletPlusFactory()
+
 
   /**
    * 屏幕中出现的敌机最大数量
@@ -64,6 +87,15 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
    */
   private val enemyRate = 10
 
+  /**
+   * 道具生成概率
+   * 30% 生成血量道具
+   * 30% 生成炸弹道具
+   * 30% 生成子弹道具(两种)
+   * 10% 不生成道具
+   */
+  private val propRate = 10
+
   // 背景图片
   private var backgroundBitmapScaled: Bitmap? = null
   private var backgroundTop: Int = 0
@@ -79,6 +111,9 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
 
   // 分数
   private var score = 0
+
+  // 观察者
+  private var bombSubject: BombSubject = BombSubject()
 
   //  画笔，用于绘制图像、文字
   private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -190,6 +225,10 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
           enemyAircrafts.add(bossEnemyFactory.createEnemy()!!);
           bossExistFlag = 1;
         }
+
+        // 观察者注册新敌机
+        bombSubject.registerObserver(enemyAircrafts.get(enemyAircrafts.size - 1));
+
         // 所有飞行器发送子弹
         shootAction()
       }
@@ -199,6 +238,9 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
 
       // 飞行器移动
       aircraftsMoveAction()
+
+      // 道具移动
+      propsMoveAction()
 
       // 碰撞检测
       crashCheckAction()
@@ -273,8 +315,40 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
     }
   }
 
+  private fun propsMoveAction() {
+    for (prop in props) {
+      prop.forward()
+    }
+  }
+
+  private fun generateProp(x: Int, y: Int) {
+    val randomNum: Int = randomFactory.nextInt(propRate).toInt()
+    if (randomNum in 0..<3) { // 30% 生成血量道具
+      props.add(propBloodFactory.createProp(x, y)!!)
+    } else if (randomNum in 3..<6) { // 30% 生成炸弹道具
+      props.add(propBombFactory.createProp(x, y)!!)
+    } else if (randomNum in 6..<9) { // 30% 生成子弹道具(两种)
+      val bulletType: Int = randomFactory.nextInt(2)
+      if (bulletType == 0) {
+        props.add(propBulletFactory.createProp(x, y)!!)
+      } else if (bulletType == 1) {
+        props.add(propBulletPlusFactory.createProp(x, y)!!)
+      }
+    } else { // 10% 不生成道具
+      return
+    }
+  }
+
   private fun crashCheckAction() {
-    // TODO: Enemy bullets attack hero
+
+    // 敌机子弹攻击英雄
+    for (bullet in enemyBullets) {
+      if (bullet.notValid()) continue
+      if (heroAircraft.crash(bullet)) {
+        heroAircraft.decreaseHp(bullet.power)
+        bullet.vanish()
+      }
+    }
 
     // 英雄子弹与敌机碰撞检测
     for (bullet in heroBullets) {
@@ -282,13 +356,32 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
       for (enemyAircraft in enemyAircrafts) {
         if (enemyAircraft.notValid()) continue
         if (enemyAircraft.crash(bullet)) {
-          Log.d(TAG, "Enemy hit by hero bullet")
           // Enemy hit by hero bullet
           enemyAircraft.decreaseHp(bullet.power)
           bullet.vanish()
           if (enemyAircraft.notValid()) {
-            // TODO: Score and supply drops
-            score += 10
+            val propX: Int = enemyAircraft.getLocationXVal()
+            val propY: Int = enemyAircraft.getLocationYVal()
+            when (enemyAircraft) {
+              is MobEnemy -> {
+                // Normal enemy
+              }
+
+              is EliteEnemy -> {
+                generateProp(propX, propY)
+              }
+
+              is SuperEliteEnemy -> {
+                generateProp(propX, propY)
+              }
+            }
+            if (enemyAircraft is BossEnemy) { // 生成 <= 3个道具
+              generateProp(propX, propY)
+              generateProp((propX + 100) % AircraftWarApplication.SCREEN_WIDTH, propY + 20)
+              generateProp((propX + 200) % AircraftWarApplication.SCREEN_WIDTH, propY + 50)
+              bossExistFlag = 0 // Boss被击毁，标志复位
+              bossKillCount += 1
+            }
           }
         }
       }
@@ -303,12 +396,66 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
       }
     }
 
-    // TODO: Hero picks up supplies
+    for (prop in props) {
+      if (prop.notValid()) continue
+      if (heroAircraft.crash(prop)) {
+        prop.vanish()
+//        if (MusicOpen) MusicThread(get_prop_music).start()
+        when (prop) {
+          is PropBlood -> {
+            heroAircraft.increaseHp(30)
+          }
+
+          is PropBullet -> {
+            heroAircraft.changeShootMode("SCATTER")
+          }
+
+          is PropBulletPlus -> {
+            heroAircraft.changeShootMode("WAVE")
+          }
+
+          is PropBomb -> {
+      //          if (MusicOpen) MusicThread(boom_music).start()
+            prop.action()
+            bombSubject.notifyObservers()
+          }
+        }
+      }
+    }
   }
 
   private fun postProcessAction() {
-    enemyBullets.removeAll { it.notValid() }
+    // 移除无效敌机
+    val aircraftIter = enemyAircrafts.iterator()
+    while (aircraftIter.hasNext()) {
+      val aircraft = aircraftIter.next()
+      if (!aircraft.notValid()) continue  // 注意：notValid() 返回 true 表示无效
+
+      // 获得分数
+      when (aircraft) {
+        is MobEnemy -> score += 10
+        is EliteEnemy -> score += 20
+        is SuperEliteEnemy -> score += 30
+        is BossEnemy -> score += 50
+      }
+
+
+      bombSubject.removeObserver(aircraft) // 先取消注册
+      aircraftIter.remove() // 再从集合移除
+    }
+
+    // 移除无效子弹
+    val bulletIter = enemyBullets.iterator()
+    while (bulletIter.hasNext()) {
+      val bullet = bulletIter.next()
+      if (!bullet.notValid()) continue
+      bombSubject.removeObserver(bullet)
+      bulletIter.remove()
+    }
+
     heroBullets.removeAll { it.notValid() }
+    props.removeAll { it.notValid() }
+    enemyBullets.removeAll { it.notValid() }
     enemyAircrafts.removeAll { it.notValid() }
   }
 
@@ -351,6 +498,7 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback,
     drawObjects(canvas, enemyBullets)
     drawObjects(canvas, heroBullets)
     drawObjects(canvas, enemyAircrafts)
+    drawObjects(canvas, props)
 
     // Draw hero aircraft
     val heroImg = ImageManager.heroImage

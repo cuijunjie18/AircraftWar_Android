@@ -11,6 +11,7 @@ import edu.hitsz.aircraftwar.logic.aircraft.MobEnemy
 import edu.hitsz.aircraftwar.logic.aircraft.*
 import edu.hitsz.aircraftwar.logic.bullet.EnemyBullet
 import edu.hitsz.aircraftwar.logic.bullet.HeroBullet
+import edu.hitsz.aircraftwar.logic.prop.*
 
 object ImageManager {
 
@@ -69,10 +70,10 @@ object ImageManager {
     classNameImageMap[EliteEnemy::class.java.name] = eliteEnemyImage
     classNameImageMap[SuperEliteEnemy::class.java.name] = superEliteEnemyImage
     classNameImageMap[BossEnemy::class.java.name] = bossEnemyImage
-//    classNameImageMap[PropBlood::class.java.name] = propBloodImage
-//    classNameImageMap[PropBomb::class.java.name] = propBombImage
-//    classNameImageMap[PropBullet::class.java.name] = propBulletImage
-//    classNameImageMap[PropBulletPlus::class.java.name] = propBulletPlusImage
+    classNameImageMap[PropBlood::class.java.name] = propBloodImage
+    classNameImageMap[PropBomb::class.java.name] = propBombImage
+    classNameImageMap[PropBullet::class.java.name] = propBulletImage
+    classNameImageMap[PropBulletPlus::class.java.name] = propBulletPlusImage
   }
 
   fun get(className: String): Bitmap? {
