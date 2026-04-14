@@ -24,3 +24,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "AircraftWar"
 include(":app")
+include(":feature-Online")

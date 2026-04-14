@@ -16,6 +16,7 @@ class MenuActivity: AppCompatActivity() {
   private lateinit var easyButton: Button
   private lateinit var mediumButton: Button
   private lateinit var hardButton: Button
+  private lateinit var onlineButton: Button
   private lateinit var musicSwitch: Switch
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -31,12 +32,14 @@ class MenuActivity: AppCompatActivity() {
     easyButton = findViewById(R.id.buttonForSimple)
     mediumButton = findViewById(R.id.buttonForMedium)
     hardButton = findViewById(R.id.buttonForHard)
+    onlineButton = findViewById(R.id.buttonForOnline)
     val listener = View.OnClickListener { view ->
       handleButtonClick(view)
     }
     easyButton.setOnClickListener(listener)
     mediumButton.setOnClickListener(listener)
     hardButton.setOnClickListener(listener)
+    onlineButton.setOnClickListener(listener)
   }
 
   private fun setupMusicSwitch() {
@@ -60,6 +63,9 @@ class MenuActivity: AppCompatActivity() {
       }
       R.id.buttonForHard -> {
         Setting.difficulty = Hard()
+      }
+      R.id.buttonForOnline -> {
+        Setting.onlineMode = true
       }
     }
     startGame()

@@ -35,7 +35,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/buttonForHard"
-        android:text="困难模式" />
+        android:text="困难模式"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/buttonForOnline"
+        android:text="联机模式" />
 
     <Switch
         android:layout_marginTop="16dp"
@@ -45,6 +52,6 @@
         android:text="音效"
         android:checked="false"
         android:thumbTint="@color/switch_thumb_color"
-        android:trackTint="@color/switch_track_color"/>
+        android:trackTint="@color/switch_track_color" />
 
 </LinearLayout>

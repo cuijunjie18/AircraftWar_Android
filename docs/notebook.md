@@ -72,3 +72,34 @@ cd <project_root_dir>
   ```
   启动后会跳出对应图形界面，后续安装等操作同真机测试
 
+## 三、在App，即启动模块导入自定义的依赖
+
+### 创建自定义的依赖
+
+即在当前工程目录下创建一个No activity的Module，取名feature-xxx或者group-xxx，如图
+![自定义模块](../assets/selfModule.png)
+
+然后可以在settings.gradle中看到导入的模块
+```vim
+rootProject.name = "AircraftWar"
+include(":app")
+include(":feature-Online")
+```
+
+### 导入依赖
+
+在对应模块/主app中的build.gradle中添加，如下
+```vim
+dependencies {
+  implementation(libs.androidx.core.ktx)
+  implementation(libs.androidx.appcompat)
+  implementation(libs.material)
+  implementation(libs.androidx.activity)
+  implementation(libs.androidx.constraintlayout)
+  implementation(project(":feature-Online")) # 导入自定义模块依赖
+  implementation("com.google.code.gson:gson:2.13.2") # 导入第三方依赖
+  testImplementation(libs.junit)
+  androidTestImplementation(libs.androidx.junit)
+  androidTestImplementation(libs.androidx.espresso.core)
+}
+```

@@ -19,6 +19,7 @@ import edu.hitsz.aircraftwar.data.SingleGameInfo
 import edu.hitsz.aircraftwar.logic.utils.ImageManager
 import edu.hitsz.aircraftwar.logic.utils.Utils
 import edu.hitsz.aircraftwar.setting.Setting
+import com.example.feature_online.*
 
 /**
  * Android 程序入口 - 替代 Swing 的 Main 类
@@ -47,12 +48,16 @@ class MainActivity : AppCompatActivity() {
     // 初始化自定义游戏 View
     gameView = GameView(AircraftWarApplication.context)
     val container = findViewById<FrameLayout>(R.id.game_container)
-    container.addView(gameView)
 
-    // 定义游戏结束回调
-    gameView.onGameOver = { score ->
-      Log.d(TAG, "game over: $score")
-      gameOver(score)
+    if (Setting.onlineMode) {
+      container.addView(gameView)
+      // 定义游戏结束回调
+      gameView.onGameOver = { score ->
+        Log.d(TAG, "game over: $score")
+        gameOver(score)
+      }
+    } else {
+      var server: OnlineGameServer = OnlineGameServer()
     }
   }
 
