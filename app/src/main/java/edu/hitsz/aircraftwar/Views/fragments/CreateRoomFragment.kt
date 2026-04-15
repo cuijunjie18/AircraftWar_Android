@@ -7,7 +7,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity.CONNECTIVITY_SERVICE
@@ -15,10 +14,11 @@ import androidx.fragment.app.Fragment
 import com.example.feature_online.OnlineGameClient
 import com.example.feature_online.OnlineGameServer
 import edu.hitsz.aircraftwar.R
+import edu.hitsz.aircraftwar.Views.OnlineActivity
 
 /**
  * 创建房间 Fragment
- * 显示当前房间的 IP 地址和端口号
+ * 显示当前房间的 IP 地址和端口号，启动服务端并自身作为客户端连接
  */
 class CreateRoomFragment : Fragment() {
 
@@ -28,6 +28,7 @@ class CreateRoomFragment : Fragment() {
 
   private lateinit var textRoomIp: TextView
   private lateinit var textRoomPort: TextView
+  private lateinit var textStatus: TextView
 
   private val port: Int = 50001
 
@@ -57,12 +58,26 @@ class CreateRoomFragment : Fragment() {
       return
     }
 
-    // 启动服务端
-    Thread { OnlineGameServer(port) }.start()
-    Log.d(TAG, "serverAddress: $serverAddress, port: $port")
+    // 启动服务端（阻塞直到2人连接）
+    Thread({
+      OnlineGameServer(port).run()
+    }, "GameServer").start()
+    Log.d(TAG, "服务端已启动, serverAddress: $serverAddress, port: $port")
 
     // 启动客户端连接自己
-    Thread { OnlineGameClient(serverAddress, port) }.start()
+    val client = OnlineGameClient(serverAddress, port)
+    client.onConnected = {
+      // 连接成功且收到游戏开始信号，切换到游戏界面
+      Log.d(TAG, "收到游戏开始信号，准备启动游戏")
+      activity?.runOnUiThread {
+        (activity as? OnlineActivity)?.startGame(client)
+      }
+      // 启动接收线程，持续监听服务端数据
+      client.startReceiving()
+    }
+    Thread({
+      client.connect()
+    }, "GameClient-Creator").start()
   }
 
   /**

@@ -8,7 +8,7 @@ HITSZ软件构造实践，基于之前实现的[Windows版本](https://github.co
 
 - [x] 实现Windows到Android的迁移(目前实现了初始版)
 - [x] 使用kotlin重写
-- [ ] 添加网络功能
+- [x] 添加网络功能，实现联机
 
 ## 待优化问题
 

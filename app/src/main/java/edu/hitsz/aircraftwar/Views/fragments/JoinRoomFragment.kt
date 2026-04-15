@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import com.example.feature_online.OnlineGameClient
 import com.google.android.material.textfield.TextInputEditText
 import edu.hitsz.aircraftwar.R
+import edu.hitsz.aircraftwar.Views.OnlineActivity
 
 /**
  * 加入房间 Fragment
@@ -65,10 +66,30 @@ class JoinRoomFragment : Fragment() {
     }
 
     Log.d(TAG, "加入房间: $ip:$port")
-    Thread { OnlineGameClient(ip, port) }.start()
-
-    Toast.makeText(requireContext(), "正在连接 $ip:$port ...", Toast.LENGTH_SHORT).show()
     buttonJoinRoom.isEnabled = false
     buttonJoinRoom.text = "连接中..."
+
+    val client = OnlineGameClient(ip, port)
+    client.onConnected = {
+      // 连接成功且收到游戏开始信号，切换到游戏界面
+      Log.d(TAG, "收到游戏开始信号，准备启动游戏")
+      activity?.runOnUiThread {
+        (activity as? OnlineActivity)?.startGame(client)
+      }
+      // 启动接收线程，持续监听服务端数据
+      client.startReceiving()
+    }
+    Thread({
+      client.connect()
+      if (!client.isConnected) {
+        activity?.runOnUiThread {
+          Toast.makeText(requireContext(), "连接失败，请检查 IP 和端口", Toast.LENGTH_SHORT).show()
+          buttonJoinRoom.isEnabled = true
+          buttonJoinRoom.text = "加入房间"
+        }
+      }
+    }, "GameClient-Joiner").start()
+
+    Toast.makeText(requireContext(), "正在连接 $ip:$port ...", Toast.LENGTH_SHORT).show()
   }
 }

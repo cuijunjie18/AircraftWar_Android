@@ -37,22 +37,23 @@ import edu.hitsz.aircraftwar.logic.prop.PropBulletPlus
 import edu.hitsz.aircraftwar.logic.utils.ImageManager
 import edu.hitsz.aircraftwar.setting.Music.MusicManager
 import edu.hitsz.aircraftwar.setting.Setting
+import com.example.feature_online.OnlineGameClient
 import java.util.Random
-import java.util.function.Predicate
 
 
 /**
- * 游戏主视图 - 替代 Swing 的 Game JPanel
+ * 联机游戏主视图
  * 使用 SurfaceView 支持高性能游戏渲染
+ * 通过 OnlineGameClient 与服务端通信，实时同步双方分数
  */
-class GameOnlineView(context: Context) : SurfaceView(context), SurfaceHolder.Callback, Runnable {
+class GameOnlineView(context: Context, private val client: OnlineGameClient) : SurfaceView(context), SurfaceHolder.Callback, Runnable {
 
   companion object {
-    private const val TAG = "GameView"
+    private const val TAG = "GameOnlineView"
 
     // 目标帧率
-    private const val TARGET_FPS = 60
-    private const val FRAME_INTERVAL = 1000L / TARGET_FPS  // ~16ms
+    private const val TARGET_FPS = 45 // 联机模式降低帧率60 -> 45，减少延迟
+    private const val FRAME_INTERVAL = 1000L / TARGET_FPS  // ~22ms
   }
 
   // 飞行物列表
@@ -108,11 +109,16 @@ class GameOnlineView(context: Context) : SurfaceView(context), SurfaceHolder.Cal
   private var timeInterval = 40
 
   // Game over标识
-  private var gameOverFlag = false
+  private var gameOverFlag = false       // 本方英雄是否死亡
+  @Volatile
+  private var onlineAllOver = false      // 对战是否全部结束（双方都死亡）
   var onGameOver: ((Int) -> Unit)? = null // 游戏结束回调
 
   // 分数
-  private var score = 0
+  private var score = 0                  // 本方分数
+  @Volatile
+  private var opponentScore = 0          // 对手分数
+  private var lastSentScore = -1         // 上次发送的分数，避免重复发送
 
   // 观察者
   private var bombSubject: BombSubject = BombSubject()
@@ -132,10 +138,19 @@ class GameOnlineView(context: Context) : SurfaceView(context), SurfaceHolder.Cal
 
 
   init {
-    Log.d(TAG, "GameView created")
+    Log.d(TAG, "GameOnlineView created")
     surfaceHolder.addCallback(this) // 设置SurfaceHolder回调，监听surface创建和销毁
     isFocusable = true
     isFocusableInTouchMode = true
+
+    // 设置网络数据接收回调
+    client.onServerDataReceived = { oppScore, isAllOver ->
+      opponentScore = oppScore
+      if (isAllOver) {
+        onlineAllOver = true
+        Log.d(TAG, "对战结束！本方分数: $score, 对手分数: $oppScore")
+      }
+    }
   }
 
   private fun initGameObjects() {
@@ -202,69 +217,87 @@ class GameOnlineView(context: Context) : SurfaceView(context), SurfaceHolder.Cal
     Log.d(TAG, "Game paused")
   }
   override fun run() {
-    while (isRunning && !gameOverFlag) {
+    while (isRunning) {
       val lastFrameTime = System.currentTimeMillis()
 
-      // 敌机生成、子弹发射频率控制
-      if (timeCountAndNewCycleJudge()) {
-        // Spawn new enemy aircraft
-        if (enemyAircrafts.size < enemyMaxNumber) {
-          val randomNum = randomFactory.nextInt(enemyRate).toInt()
+      // 本方未死亡时，执行正常游戏逻辑
+      if (!gameOverFlag) {
+        // 敌机生成、子弹发射频率控制
+        if (timeCountAndNewCycleJudge()) {
+          // Spawn new enemy aircraft
+          if (enemyAircrafts.size < enemyMaxNumber) {
+            val randomNum = randomFactory.nextInt(enemyRate).toInt()
 
-          // 根据随机数生成普通、精英敌机、超级精英敌机
-          if (randomNum == 0){
-            enemyAircrafts.add(superEliteEnemyFactory.createEnemy()!!);
-          }else if (randomNum == 1 || randomNum == 2){
-            enemyAircrafts.add(eliteEnemyFactory.createEnemy()!!);
+            // 根据随机数生成普通、精英敌机、超级精英敌机
+            if (randomNum == 0){
+              enemyAircrafts.add(superEliteEnemyFactory.createEnemy()!!);
+            }else if (randomNum == 1 || randomNum == 2){
+              enemyAircrafts.add(eliteEnemyFactory.createEnemy()!!);
+            }
+            else{
+              enemyAircrafts.add(mobEnemyFactory.createEnemy()!!);
+            }
           }
-          else{
-            enemyAircrafts.add(mobEnemyFactory.createEnemy()!!);
+
+          // 每300分产生一个Boss, 且场上只能有一个Boss(仅普通模式、困难模式)
+          if (score >= (bossKillCount + 1) * 300 && score != 0 && bossExistFlag == 0
+            && Setting.getDifficulty() != "easy"){
+            MusicManager.switchBossBgm()
+            enemyAircrafts.add(bossEnemyFactory.createEnemy()!!);
+            bossExistFlag = 1;
           }
+
+          // 观察者注册新敌机
+          bombSubject.registerObserver(enemyAircrafts.get(enemyAircrafts.size - 1));
+
+          // 所有飞行器发送子弹
+          shootAction()
         }
 
-        // 每300分产生一个Boss, 且场上只能有一个Boss(仅普通模式、困难模式)
-        if (score >= (bossKillCount + 1) * 300 && score != 0 && bossExistFlag == 0
-          && Setting.getDifficulty() != "easy"){
-          MusicManager.switchBossBgm()
-          enemyAircrafts.add(bossEnemyFactory.createEnemy()!!);
-          bossExistFlag = 1;
+        // 子弹飞动
+        bulletsMoveAction()
+
+        // 飞行器移动
+        aircraftsMoveAction()
+
+        // 道具移动
+        propsMoveAction()
+
+        // 碰撞检测
+        crashCheckAction()
+
+        // 后处理
+        postProcessAction()
+
+        // 检查英雄是否存活
+        if (heroAircraft.hp <= 0) {
+          if (Setting.musicOpen) {
+            MusicManager.stopBgm()
+            MusicManager.playSound(MusicManager.SoundType.GAME_OVER)
+          }
+          gameOverFlag = true
+          // 发送死亡通知
+          client.sendData(score, true)
+          lastSentScore = score
+          Log.d(TAG, "本方英雄阵亡，分数: $score")
         }
 
-        // 观察者注册新敌机
-        bombSubject.registerObserver(enemyAircrafts.get(enemyAircrafts.size - 1));
-
-        // 所有飞行器发送子弹
-        shootAction()
+        // 发送本方分数到服务端（分数变化时才发送）
+        if (score != lastSentScore) {
+          client.sendData(score, false)
+          lastSentScore = score
+        }
       }
 
-      // 子弹飞动
-      bulletsMoveAction()
-
-      // 飞行器移动
-      aircraftsMoveAction()
-
-      // 道具移动
-      propsMoveAction()
-
-      // 碰撞检测
-      crashCheckAction()
-
-      // 后处理
-      postProcessAction()
-
-      // 绘制帧
+      // 无论是否死亡，都持续绘制帧（死亡后显示等待/结果画面）
       drawFrame()
 
-      // Check if hero is alive
-      if (heroAircraft.hp <= 0) {
-        if (Setting.musicOpen) {
-          MusicManager.stopBgm()
-          MusicManager.playSound(MusicManager.SoundType.GAME_OVER)
-        }
-        gameOverFlag = true
-        post { onGameOver?.invoke(score) }
+      // 如果对战全部结束（双方都死亡），退出游戏循环
+      if (onlineAllOver) {
+        drawFrame() // 多绘制一帧确保最终结果显示
+        Log.d(TAG, "对战结束，退出游戏循环")
+        break
       }
-
 
       // 帧率控制
       val currentTime = System.currentTimeMillis()
@@ -543,9 +576,84 @@ class GameOnlineView(context: Context) : SurfaceView(context), SurfaceHolder.Cal
   private fun drawScoreAndLife(canvas: Canvas) {
     val x = 20f
     var y = 60f
-    canvas.drawText("SCORE: $score", x, y, textPaint)
+    canvas.drawText("我的分数: $score", x, y, textPaint)
+    y += 50f
+    canvas.drawText("对手分数: $opponentScore", x, y, textPaint)
     y += 50f
     canvas.drawText("LIFE: ${heroAircraft.hp}", x, y, textPaint)
+
+    // 本方已死亡但对战未结束，显示等待提示
+    if (gameOverFlag && !onlineAllOver) {
+      drawWaitingOverlay(canvas)
+    }
+
+    // 对战全部结束，显示最终结果
+    if (onlineAllOver) {
+      drawFinalResult(canvas)
+    }
+  }
+
+  /**
+   * 本方已死亡，等待对手结束
+   */
+  private fun drawWaitingOverlay(canvas: Canvas) {
+    // 半透明遮罩
+    val overlayPaint = Paint().apply { color = Color.argb(150, 0, 0, 0) }
+    canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), overlayPaint)
+
+    val tipPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+      color = Color.WHITE
+      textSize = 64f
+      typeface = Typeface.DEFAULT_BOLD
+      textAlign = Paint.Align.CENTER
+    }
+    canvas.drawText("你已阵亡", width / 2f, height / 2f - 60f, tipPaint)
+    tipPaint.textSize = 40f
+    canvas.drawText("等待对手结束...", width / 2f, height / 2f + 20f, tipPaint)
+  }
+
+  /**
+   * 双方都死亡，显示最终对战结果
+   */
+  private fun drawFinalResult(canvas: Canvas) {
+    // 半透明遮罩
+    val overlayPaint = Paint().apply { color = Color.argb(180, 0, 0, 0) }
+    canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), overlayPaint)
+
+    val titlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+      color = Color.YELLOW
+      textSize = 72f
+      typeface = Typeface.DEFAULT_BOLD
+      textAlign = Paint.Align.CENTER
+    }
+    canvas.drawText("对战结束", width / 2f, height / 2f - 120f, titlePaint)
+
+    val scorePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+      color = Color.WHITE
+      textSize = 52f
+      typeface = Typeface.DEFAULT_BOLD
+      textAlign = Paint.Align.CENTER
+    }
+    canvas.drawText("我的分数: $score", width / 2f, height / 2f - 30f, scorePaint)
+    canvas.drawText("对手分数: $opponentScore", width / 2f, height / 2f + 40f, scorePaint)
+
+    // 显示胜负结果
+    val resultText = when {
+      score > opponentScore -> "你赢了！"
+      score < opponentScore -> "你输了！"
+      else -> "平局！"
+    }
+    val resultPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+      color = when {
+        score > opponentScore -> Color.GREEN
+        score < opponentScore -> Color.RED
+        else -> Color.CYAN
+      }
+      textSize = 80f
+      typeface = Typeface.DEFAULT_BOLD
+      textAlign = Paint.Align.CENTER
+    }
+    canvas.drawText(resultText, width / 2f, height / 2f + 140f, resultPaint)
   }
 
   // =====================
@@ -553,6 +661,9 @@ class GameOnlineView(context: Context) : SurfaceView(context), SurfaceHolder.Cal
   // =====================
 
   override fun onTouchEvent(event: MotionEvent): Boolean {
+    if (gameOverFlag) { // 游戏结束，不响应触摸事件
+      return true
+    }
     when (event.action) {
       MotionEvent.ACTION_MOVE, MotionEvent.ACTION_DOWN -> {
         val x = event.x
@@ -573,6 +684,7 @@ class GameOnlineView(context: Context) : SurfaceView(context), SurfaceHolder.Cal
    */
   fun release() {
     overGame()
+    client.disconnect()
   }
 
 }

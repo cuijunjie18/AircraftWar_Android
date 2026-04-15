@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
+import com.example.feature_online.OnlineGameClient
 import edu.hitsz.aircraftwar.AircraftWarApplication
 import edu.hitsz.aircraftwar.R
 import edu.hitsz.aircraftwar.Views.fragments.CreateRoomFragment
@@ -48,14 +49,17 @@ class OnlineActivity : AppCompatActivity() {
       .commit()
   }
 
-  // 启动游戏
-  private fun startGame() {
+  /**
+   * 启动联机游戏
+   * @param client 已连接的 OnlineGameClient 实例
+   */
+  fun startGame(client: OnlineGameClient) {
     // 初始化图片管理器
     ImageManager.init(AircraftWarApplication.context)
 
     // 初始化自定义游戏 View
     setContentView(R.layout.activity_main)
-    val gameView = GameOnlineView(AircraftWarApplication.context)
+    val gameView = GameOnlineView(this, client)
     val container = findViewById<FrameLayout>(R.id.game_container)
     container.addView(gameView)
   }
