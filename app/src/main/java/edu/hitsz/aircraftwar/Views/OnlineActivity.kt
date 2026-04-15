@@ -1,18 +1,14 @@
 package edu.hitsz.aircraftwar.Views
 
-import android.net.ConnectivityManager
-import android.net.LinkProperties
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
-import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
+import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.example.feature_online.*
 import edu.hitsz.aircraftwar.AircraftWarApplication
 import edu.hitsz.aircraftwar.R
+import edu.hitsz.aircraftwar.Views.fragments.CreateRoomFragment
+import edu.hitsz.aircraftwar.Views.fragments.JoinRoomFragment
+import edu.hitsz.aircraftwar.logic.utils.ImageManager
 
 class OnlineActivity : AppCompatActivity() {
   companion object {
@@ -30,37 +26,37 @@ class OnlineActivity : AppCompatActivity() {
   private fun initView() {
     createRoomButton = findViewById(R.id.buttonForCreateRoom)
     joinRoomButton = findViewById(R.id.buttonForJoinRoom)
-    createRoomButton.setOnClickListener { createRoom() }
-    joinRoomButton.setOnClickListener { joinRoom() }
+    createRoomButton.setOnClickListener { showCreateRoomFragment() }
+    joinRoomButton.setOnClickListener { showJoinRoomFragment() }
   }
 
-  private fun createRoom() {
-    val port: Int = 50001
-    Thread{ OnlineGameServer(port) }.start()
-
-    val serverAddress = getServerAddress()
-    Log.d(TAG, "serverAddress: $serverAddress")
-    Thread{ OnlineGameClient(serverAddress,port) }.start()
-
-    Toast.makeText(this, "创建房间成功", Toast.LENGTH_SHORT).show()
-
+  /**
+   * 显示创建房间 Fragment
+   */
+  private fun showCreateRoomFragment() {
+    supportFragmentManager.beginTransaction()
+      .replace(R.id.fragmentContainer, CreateRoomFragment())
+      .commit()
   }
 
-  private fun joinRoom() {
-
+  /**
+   * 显示加入房间 Fragment
+   */
+  private fun showJoinRoomFragment() {
+    supportFragmentManager.beginTransaction()
+      .replace(R.id.fragmentContainer, JoinRoomFragment())
+      .commit()
   }
 
-  private fun getServerAddress(): String {
-    val connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
-    val activeNetwork = connectivityManager.activeNetwork
-    val linkProperties: LinkProperties? = connectivityManager.getLinkProperties(activeNetwork)
-    linkProperties?.linkAddresses?.forEach { linkAddress ->
-      val address = linkAddress.address
-      // 过滤 IPv4 地址且排除回环地址
-      if (address is java.net.Inet4Address && !address.isLoopbackAddress) {
-        return address.hostAddress ?: ""
-      }
-    }
-    return ""
+  // 启动游戏
+  private fun startGame() {
+    // 初始化图片管理器
+    ImageManager.init(AircraftWarApplication.context)
+
+    // 初始化自定义游戏 View
+    setContentView(R.layout.activity_main)
+    val gameView = GameOnlineView(AircraftWarApplication.context)
+    val container = findViewById<FrameLayout>(R.id.game_container)
+    container.addView(gameView)
   }
 }
