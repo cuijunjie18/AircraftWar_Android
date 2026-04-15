@@ -1,6 +1,5 @@
 package com.example.feature_online
 
-import android.util.Log
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.IOException
@@ -21,7 +20,6 @@ class OnlineGameClient(val serverIP: String, val serverPort: Int): Runnable {
     try {
       socket = Socket()
       socket!!.connect(InetSocketAddress(serverIP, serverPort), 5000)
-      Log.d("OnlineGameClient", "Connected to $serverIP:$serverPort")
       infoReceiver = BufferedReader(InputStreamReader(socket!!.getInputStream(), "utf-8"))
       infoBroadcaster = PrintWriter(BufferedWriter(OutputStreamWriter(socket!!.getOutputStream(), "utf-8")), true)
 
@@ -30,9 +28,5 @@ class OnlineGameClient(val serverIP: String, val serverPort: Int): Runnable {
     } catch (ex: IOException) {
       ex.printStackTrace()
     }
-  }
-
-  fun startGame() {
-
   }
 }

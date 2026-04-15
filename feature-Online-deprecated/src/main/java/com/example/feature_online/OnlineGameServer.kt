@@ -1,6 +1,5 @@
 package com.example.feature_online
 
-import android.util.Log
 import com.google.gson.Gson
 import java.io.BufferedReader
 import java.io.BufferedWriter
@@ -14,7 +13,6 @@ import kotlin.jvm.java
 import com.example.feature_online.OnlineClientData
 import com.example.feature_online.OnlineServerData
 import java.lang.Thread.sleep
-import kotlin.collections.mutableListOf
 import kotlin.concurrent.thread
 
 enum class GameState {
@@ -28,50 +26,35 @@ enum class GameState {
  * OnlineGameServer
  * 注：为了提高性能，分数读取均不加锁
  */
-class OnlineGameServer(val port: Int = 50001): Runnable {
+class OnlineGameServer(val port: Int = 50001) {
   companion object {
     const val TAG = "OnlineGameServer"
   }
   private var onlinePlayerCount: Int = 0
   private var gameState: GameState = GameState.WAITING
-  private var score: Int = 0
-  private lateinit var connSockets: MutableList<Socket> // 用于存储连接的 socket，统一管理
+  @Volatile private var score: Int = 0
   private val scoreLock = Any() // 用于同步 score 的锁对象
   private val onlinePlayerCountLock = Any() // 用于同步 onlinePlayerCount 的锁对象
 
-  override fun run() {
-    prepare()
-    if (onlinePlayerCount == 2) { // 两个玩家都连接上才开始游戏，降低服务线程状态机复杂度
-      startGame()
-    }
-  }
-
-  fun prepare() {
+  init {
     try {
       val serverSocket = ServerSocket(port)
-      connSockets = mutableListOf()
       while (true) {
         if (onlinePlayerCount < 2) {
-          Log.d(TAG, "waiting client connect")
+          println("waiting client connect")
           val socket = serverSocket.accept()
-          Log.d(TAG, "accept client connect $socket")
-          connSockets.add(socket)
+          println("accept client connect $socket")
+          Thread(OnlineService(socket)).start()
           onlinePlayerCount++
         } else {
           gameState = GameState.PLAYING
-          Log.d(TAG, "online player count is 2. Ready to start game")
+          println("online player count is 2. Ready to start game")
           break
         }
       }
-
+      while (gameState == GameState.PLAYING) { }
     } catch (ex: Exception) {
       ex.printStackTrace()
-    }
-  }
-
-  fun startGame() {
-    for (i in 0 until connSockets.size) {
-       Thread(OnlineService(connSockets[i])).start()
     }
   }
 
@@ -83,7 +66,6 @@ class OnlineGameServer(val port: Int = 50001): Runnable {
       try {
         infoReceiver = BufferedReader(InputStreamReader(socket.getInputStream()))
         infoBroadcaster = PrintWriter(BufferedWriter(OutputStreamWriter(socket.getOutputStream(), "utf-8")), true)
-        sendServerData() // 发送第一次数据，通知客户端游戏开始
       } catch (ex: IOException) {
         ex.printStackTrace()
       }
@@ -91,6 +73,7 @@ class OnlineGameServer(val port: Int = 50001): Runnable {
 
     override fun run() {
       try {
+        while (gameState == GameState.WAITING) { }
         while (gameState == GameState.PLAYING) {
           val content = infoReceiver!!.readLine()
           var clientData: OnlineClientData = Gson().fromJson(content, OnlineClientData::class.java)

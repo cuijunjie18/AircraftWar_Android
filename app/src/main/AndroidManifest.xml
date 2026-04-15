@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <application
         android:name=".AircraftWarApplication"
@@ -15,6 +17,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AircraftWar">
         <activity
+            android:name=".Views.OnlineActivity"
+            android:exported="false" />
+        <activity
             android:name=".Views.RankActivity"
             android:exported="true">
             <intent-filter>
@@ -22,7 +27,6 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-
         </activity>
         <activity
             android:name=".MainActivity"

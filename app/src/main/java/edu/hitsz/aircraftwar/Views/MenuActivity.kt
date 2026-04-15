@@ -72,7 +72,9 @@ class MenuActivity: AppCompatActivity() {
   }
 
   private fun startGame() {
-    val intent = Intent(this, MainActivity::class.java)
-    startActivity(intent)
+    when (Setting.onlineMode) {
+      true -> { startActivity(Intent(this, OnlineActivity::class.java))}
+      false -> { startActivity(Intent(this, MainActivity::class.java)) }
+    }
   }
 }
