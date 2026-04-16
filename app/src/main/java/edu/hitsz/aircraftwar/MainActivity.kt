@@ -21,13 +21,14 @@ import edu.hitsz.aircraftwar.logic.utils.ImageManager
 import edu.hitsz.aircraftwar.logic.utils.Utils
 import edu.hitsz.aircraftwar.setting.Setting
 import com.example.feature_online.*
+import edu.hitsz.aircraftwar.Views.BaseActivity
 import kotlinx.coroutines.launch
 
 /**
  * Android 程序入口 - 替代 Swing 的 Main 类
  * @author hitsz
  */
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
   companion object {
     // 保持与原项目一致的逻辑尺寸（用于游戏坐标计算）

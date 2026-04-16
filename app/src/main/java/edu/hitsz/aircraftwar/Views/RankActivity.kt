@@ -13,7 +13,7 @@ import edu.hitsz.aircraftwar.R
 import edu.hitsz.aircraftwar.data.DataManager
 import edu.hitsz.aircraftwar.setting.Setting
 
-class RankActivity : AppCompatActivity() {
+class RankActivity : BaseActivity() {
   @SuppressLint("MissingInflatedId")
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)

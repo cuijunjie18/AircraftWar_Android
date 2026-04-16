@@ -12,7 +12,7 @@ import edu.hitsz.aircraftwar.logic.difficulty.*
 import edu.hitsz.aircraftwar.setting.Music.MusicManager
 import edu.hitsz.aircraftwar.setting.Setting
 
-class MenuActivity: AppCompatActivity() {
+class MenuActivity: BaseActivity() {
   private lateinit var easyButton: Button
   private lateinit var mediumButton: Button
   private lateinit var hardButton: Button
