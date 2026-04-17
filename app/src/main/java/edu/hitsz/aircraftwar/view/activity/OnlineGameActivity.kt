@@ -8,8 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.feature_online.OnlineGameClient
 import edu.hitsz.aircraftwar.AircraftWarApplication
 import edu.hitsz.aircraftwar.R
-import edu.hitsz.aircraftwar.Views.fragments.CreateRoomFragment
-import edu.hitsz.aircraftwar.Views.fragments.JoinRoomFragment
+import edu.hitsz.aircraftwar.view.fragments.CreateRoomFragment
+import edu.hitsz.aircraftwar.view.fragments.JoinRoomFragment
 import edu.hitsz.aircraftwar.controller.OnlineGameController
 import edu.hitsz.aircraftwar.logic.utils.ImageManager
 import edu.hitsz.aircraftwar.model.config.GameConfig

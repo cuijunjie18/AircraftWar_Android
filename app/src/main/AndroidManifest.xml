@@ -17,13 +17,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AircraftWar">
         <activity
-            android:name=".Views.OnlineActivity"
+            android:name=".view.activity.GameActivity"
             android:exported="false" />
         <activity
             android:name=".view.activity.OnlineGameActivity"
             android:exported="false" />
         <activity
-            android:name=".Views.RankActivity"
+            android:name=".view.activity.RankActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.RankShow" />
@@ -32,25 +32,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.GameStart" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".view.activity.GameActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.GameStart" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".Views.MenuActivity"
+            android:name=".view.activity.MenuActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

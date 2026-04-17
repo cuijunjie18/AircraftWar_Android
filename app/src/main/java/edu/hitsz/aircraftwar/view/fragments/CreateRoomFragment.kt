@@ -1,4 +1,4 @@
-package edu.hitsz.aircraftwar.Views.fragments
+package edu.hitsz.aircraftwar.view.fragments
 
 import android.net.ConnectivityManager
 import android.net.LinkProperties
@@ -15,6 +15,7 @@ import com.example.feature_online.OnlineGameClient
 import com.example.feature_online.OnlineGameServer
 import edu.hitsz.aircraftwar.R
 import edu.hitsz.aircraftwar.view.activity.OnlineGameActivity
+import java.net.Inet4Address
 
 /**
  * 创建房间 Fragment
@@ -91,7 +92,7 @@ class CreateRoomFragment : Fragment() {
     linkProperties?.linkAddresses?.forEach { linkAddress ->
       val address = linkAddress.address
       // 过滤 IPv4 地址且排除回环地址
-      if (address is java.net.Inet4Address && !address.isLoopbackAddress) {
+      if (address is Inet4Address && !address.isLoopbackAddress) {
         return address.hostAddress ?: ""
       }
     }

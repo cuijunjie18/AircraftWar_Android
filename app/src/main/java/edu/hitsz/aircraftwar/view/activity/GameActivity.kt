@@ -9,8 +9,6 @@ import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
 import edu.hitsz.aircraftwar.AircraftWarApplication
 import edu.hitsz.aircraftwar.R
-import edu.hitsz.aircraftwar.Views.BaseActivity
-import edu.hitsz.aircraftwar.Views.RankActivity
 import edu.hitsz.aircraftwar.controller.GameController
 import edu.hitsz.aircraftwar.logic.utils.ImageManager
 import edu.hitsz.aircraftwar.model.config.GameConfig

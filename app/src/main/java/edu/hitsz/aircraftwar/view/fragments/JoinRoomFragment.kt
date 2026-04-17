@@ -1,4 +1,4 @@
-package edu.hitsz.aircraftwar.Views.fragments
+package edu.hitsz.aircraftwar.view.fragments
 
 import android.os.Bundle
 import android.util.Log

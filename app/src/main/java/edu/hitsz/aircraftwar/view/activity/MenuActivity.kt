@@ -1,17 +1,13 @@
-package edu.hitsz.aircraftwar.Views
+package edu.hitsz.aircraftwar.view.activity
 
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.Switch
-import androidx.appcompat.app.AppCompatActivity
 import edu.hitsz.aircraftwar.R
 import edu.hitsz.aircraftwar.logic.difficulty.*
-import edu.hitsz.aircraftwar.setting.Music.MusicManager
 import edu.hitsz.aircraftwar.setting.Setting
-import edu.hitsz.aircraftwar.view.activity.GameActivity
-import edu.hitsz.aircraftwar.view.activity.OnlineGameActivity
 
 class MenuActivity: BaseActivity() {
   private lateinit var easyButton: Button

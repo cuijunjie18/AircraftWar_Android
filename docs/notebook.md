@@ -103,3 +103,28 @@ dependencies {
   androidTestImplementation(libs.androidx.espresso.core)
 }
 ```
+
+
+## 四、AndroidManifest.xml相关
+
+### Activity中export属性
+
+```xml
+<activity 
+        android:name=".view.activity.OnlineGameActivity" 
+        android:exported="false" />
+<activity
+    android:name=".Views.RankActivity"
+    android:exported="true">
+    <intent-filter>
+      <action android:name="android.intent.action.RankShow" />
+      <category android:name="android.intent.category.DEFAULT" />
+    </intent-filter>
+</activity>
+```
+在 Android 的 AndroidManifest.xml 中，android:exported 属性用于控制其他应用是否能与当前组件（如 Activity、Service、BroadcastReceiver 等）进行交互。
+
+当给 <activity> 设置 android:exported="true" 时，意味着： 允许外部应用启动该 Activity（例如通过 startActivity() 或隐式 Intent）。
+- 如果该 Activity 声明了 <intent-filter>（如 ACTION_VIEW、MAIN/LAUNCHER 等），通常会需要 exported="true"，否则系统无法响应来自其他应用的 Intent。
+- 在 Android 12（API 31）及更高版本中，任何包含 <intent-filter> 的 Activity 都必须显式声明 android:exported，否则安装时会报错。
+- 反之，android:exported="false" 表示该 Activity 仅供应用内部使用，其他应用无法直接启动它，增强了安全性。
