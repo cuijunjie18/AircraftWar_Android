@@ -1,4 +1,4 @@
-package edu.hitsz.aircraftwar.Views
+package edu.hitsz.aircraftwar.view.recycleview_item
 
 import android.graphics.Color
 import android.view.LayoutInflater

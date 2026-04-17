@@ -1,4 +1,4 @@
-package edu.hitsz.aircraftwar.Views.fragments
+package edu.hitsz.aircraftwar.view.fragments
 
 import android.os.Bundle
 import android.util.Log
@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment
 import com.example.feature_online.OnlineGameClient
 import com.google.android.material.textfield.TextInputEditText
 import edu.hitsz.aircraftwar.R
-import edu.hitsz.aircraftwar.Views.OnlineActivity
+import edu.hitsz.aircraftwar.view.activity.OnlineGameActivity
 
 /**
  * 加入房间 Fragment
@@ -74,7 +74,7 @@ class JoinRoomFragment : Fragment() {
       // 连接成功且收到游戏开始信号，切换到游戏界面
       Log.d(TAG, "收到游戏开始信号，准备启动游戏")
       activity?.runOnUiThread {
-        (activity as? OnlineActivity)?.startGame(client)
+        (activity as? OnlineGameActivity)?.startGame(client)
       }
       // 启动接收线程，持续监听服务端数据
       client.startReceiving()

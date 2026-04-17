@@ -1,15 +1,12 @@
-package edu.hitsz.aircraftwar.Views
+package edu.hitsz.aircraftwar.view.activity
 
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.Switch
-import androidx.appcompat.app.AppCompatActivity
-import edu.hitsz.aircraftwar.MainActivity
 import edu.hitsz.aircraftwar.R
 import edu.hitsz.aircraftwar.logic.difficulty.*
-import edu.hitsz.aircraftwar.setting.Music.MusicManager
 import edu.hitsz.aircraftwar.setting.Setting
 
 class MenuActivity: BaseActivity() {
@@ -73,8 +70,8 @@ class MenuActivity: BaseActivity() {
 
   private fun startGame() {
     when (Setting.onlineMode) {
-      true -> { startActivity(Intent(this, OnlineActivity::class.java))}
-      false -> { startActivity(Intent(this, MainActivity::class.java)) }
+      true -> { startActivity(Intent(this, OnlineGameActivity::class.java))}
+      false -> { startActivity(Intent(this, GameActivity::class.java)) }
     }
   }
 }

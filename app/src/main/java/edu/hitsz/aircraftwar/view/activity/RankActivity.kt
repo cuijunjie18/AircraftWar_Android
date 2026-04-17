@@ -1,4 +1,4 @@
-package edu.hitsz.aircraftwar.Views
+package edu.hitsz.aircraftwar.view.activity
 
 import android.annotation.SuppressLint
 import android.graphics.Canvas
@@ -6,12 +6,12 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.os.Bundle
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import edu.hitsz.aircraftwar.R
 import edu.hitsz.aircraftwar.data.DataManager
 import edu.hitsz.aircraftwar.setting.Setting
+import edu.hitsz.aircraftwar.view.recycleview_item.ScoreAdapter
 
 class RankActivity : BaseActivity() {
   @SuppressLint("MissingInflatedId")
