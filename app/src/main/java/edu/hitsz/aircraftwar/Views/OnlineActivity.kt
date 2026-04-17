@@ -11,7 +11,7 @@ import edu.hitsz.aircraftwar.Views.fragments.CreateRoomFragment
 import edu.hitsz.aircraftwar.Views.fragments.JoinRoomFragment
 import edu.hitsz.aircraftwar.logic.utils.ImageManager
 
-class OnlineActivity : AppCompatActivity() {
+class OnlineActivity : BaseActivity() {
   companion object {
     const val TAG = "OnlineActivity"
   }

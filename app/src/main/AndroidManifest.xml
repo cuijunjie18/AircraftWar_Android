@@ -20,6 +20,9 @@
             android:name=".Views.OnlineActivity"
             android:exported="false" />
         <activity
+            android:name=".view.activity.OnlineGameActivity"
+            android:exported="false" />
+        <activity
             android:name=".Views.RankActivity"
             android:exported="true">
             <intent-filter>
@@ -30,6 +33,15 @@
         </activity>
         <activity
             android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.GameStart" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".view.activity.GameActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.GameStart" />
