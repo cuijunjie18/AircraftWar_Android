@@ -8,6 +8,8 @@
           <option name="hasMoreRemoteMessages" value="false" />
           <option name="id" value="019d8fed3e2a711ebf4dff4a281c6300" />
           <option name="nextBeforeCursor" value="" />
+          <option name="remoteOldestRequestAt" value="2026-04-17 11:07:17" />
+          <option name="storageSource" value="REMOTE" />
           <option name="title" value="需求文档执行指南" />
           <option name="turns">
             <list>
@@ -1752,6 +1754,7 @@
                   </map>
                 </option>
                 <option name="inputToken" value="2928142" />
+                <option name="latestTotalToken" value="124392" />
                 <option name="messageId" value="019d9975e5c4758889bf677707967606" />
                 <option name="model" value="claude-4.6-opus" />
                 <option name="outputToken" value="28886" />
