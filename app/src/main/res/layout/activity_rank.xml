@@ -6,36 +6,55 @@
     android:background="#F5F5F5">
 
     <!-- 顶部标题区域 -->
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center_horizontal"
         android:paddingTop="48dp"
         android:paddingBottom="16dp"
         android:background="#1976D2">
 
-        <TextView
-            android:id="@+id/textForRank"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="🏆 排行榜"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:fontFamily="sans-serif-medium"
-            android:letterSpacing="0.08" />
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_revert"
+            android:contentDescription="返回"
+            android:scaleType="centerInside"
+            android:tint="#FFFFFF" />
 
-        <TextView
-            android:id="@+id/textForDifficulty"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="难度：简单"
-            android:textSize="16sp"
-            android:textColor="#B3FFFFFF" />
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/textForRank"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🏆 排行榜"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.08" />
+
+            <TextView
+                android:id="@+id/textForDifficulty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="难度：简单"
+                android:textSize="16sp"
+                android:textColor="#B3FFFFFF" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
 
     <!-- 表头 -->
     <LinearLayout

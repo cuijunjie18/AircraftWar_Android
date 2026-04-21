@@ -52,7 +52,7 @@ sequenceDiagram
 ## 待优化问题
 
 - [ ] 优化联机模式下的网络服务架构
-- [ ] Activity间的执行栈顺序优化，menu->game->rank，优化为循环，即rank回退是menu,而非game
+- [x] Activity间的执行栈顺序优化，menu->game->rank，优化为循环，即rank回退是menu,而非game
 
 ## 收获
 

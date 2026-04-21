@@ -103,6 +103,9 @@ class GameActivity : BaseActivity() {
         // 跳转到排行榜
         val intent = Intent(this, RankActivity::class.java)
         startActivity(intent)
+        // 调整 Activity 栈：将 GameActivity 从栈中移除
+        // 这样从 Rank 返回时会直接回到 Menu，符合 Menu → Game → Rank → Menu 的导航流程
+        finish()
     }
 
     override fun onResume() {

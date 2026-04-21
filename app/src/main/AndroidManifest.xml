@@ -33,7 +33,8 @@
         </activity>
         <activity
             android:name=".view.activity.MenuActivity"
-            android:exported="true">
+            android:exported="true"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
